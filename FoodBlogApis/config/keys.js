@@ -2,7 +2,7 @@
 
 module.exports = {
         mongodb: {
-            dbOrg: ''
+            dbOrg: 'mongodb+srv://kaaru:karthik11c@cluster0.k3dri.mongodb.net/recipesdb?retryWrites=true&w=majority'
         },
 };
 

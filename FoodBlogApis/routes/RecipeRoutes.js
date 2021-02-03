@@ -4,10 +4,16 @@ const ObjectId = require('mongodb').ObjectID;
 var async = require('async');
 var fastfoodModel = require('../models/fastfood');
 var rn = require('random-number');
+const cors = require('cors');
+
 var options = {
   min:  1
 , max:  1000
 , integer: true
+}
+var corsOptions = {
+  origin: 'http://localhost:4200',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
  
 router.use(bodyParser.urlencoded({
@@ -17,7 +23,7 @@ router.use(bodyParser.urlencoded({
 router.use(bodyParser.json());
 
 // Add Recipe
-router.post("/addRecipe",async (req,res)=>{
+router.post("/addRecipe",cors(corsOptions),async (req,res)=>{
 
   id = rn(options);
   req.body["id"] = id; 
@@ -45,7 +51,7 @@ router.post("/addRecipe",async (req,res)=>{
 
 
 // get List of all Food Recipes
-router.get("/:id",async (req,res)=>{
+router.get("/recipeById/:id",cors(corsOptions),async (req,res)=>{
   console.log('request id :'+JSON.stringify(req.params));
   const  { id } =  req.params;
   // console.log("id:"+id);
@@ -67,7 +73,7 @@ router.get("/:id",async (req,res)=>{
 });
 
 //all docs
-router.get("/",async (req,res)=>{
+router.get("/",cors(corsOptions),async (req,res)=>{
         try{  
              await fastfoodModel.find({}, (err, result)=>{
               if(err) throw err;
@@ -80,9 +86,37 @@ router.get("/",async (req,res)=>{
         }   
   });
 
+//search apiwith sort
+
+// sort({ field : criteria}).exec(function(err, model){ 
+router.get("/searchWithSort",cors(corsOptions),async (req,res)=>{
+    try{  
+      const {recipeName,countryOrigin} = req.query;
+      let searchObject = {};     
+      conditionObject = {};
+      if(recipeName != null){
+        const userRegex = new RegExp(recipeName, 'i');
+        searchObject['recipeName'] = userRegex; 
+        conditionObject['recipeName'] = 'asc';
+      }
+      if(countryOrigin != null){
+        searchObject['countryOrigin'] = countryOrigin; 
+        conditionObject['countryOrigin'] = 'asc';
+      }
+      await fastfoodModel.find(searchObject).sort(conditionObject).exec((err, result)=>{
+        if(err) throw err;
+        console.log("response: "+JSON.stringify(result));
+        return res.json(result);
+      });
+    }catch(e){
+      console.error("error : "+e);      
+      return res.json({ message : "someThing went wrong in Backend", "response_code" : 405 });
+    }   
+});
+
 
 // update employee
-router.post('/updateRecipe', (req, res) => {
+router.post('/updateRecipe', cors(corsOptions),(req, res) => {
   // console.log('request id :'+JSON.stringify(req.body));
   const {id} = req.body;
   var arr = {};
@@ -125,7 +159,7 @@ router.post('/updateRecipe', (req, res) => {
 });
 
 // Delete a employee
-router.post('/deleteRecipe', (req, res) => {
+router.post('/deleteRecipe', cors(corsOptions),(req, res) => {
   const {id} = req.body;
  
   if(id != null)

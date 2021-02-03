@@ -1,11 +1,10 @@
 const express = require("express");
 const RecipeRoutes = require("./routes/RecipeRoutes");
-
+const cors = require('cors');
 const mongoose = require("mongoose");
 const keys = require("./config/keys");
 const bodyParser = require("body-parser");
-const app = express();
-
+const app = express(); 
 const urlencodedParser = bodyParser.urlencoded({
   extended: true
 });
@@ -29,13 +28,15 @@ mongoose.connection.on('error', err => {
 });
 mongoose.set('bufferCommands', false);
 
+app.use(cors());
+
 app.use("/recipes", RecipeRoutes);
 
 app.use(
   bodyParser.urlencoded({
     extended: true
   })
-);
+); 
 
 // create home route
 app.get("/", (req, res) => res.json({"hello" : "fck"}));
