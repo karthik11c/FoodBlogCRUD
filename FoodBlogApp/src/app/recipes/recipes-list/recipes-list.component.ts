@@ -24,7 +24,11 @@ export class RecipesListComponent implements OnInit {
   }
 
   search(): void {
-    this.recipeService.load(this.filter);
+    this.recipeService.loadAll();
+  }
+
+ get searchWithSort(): Recipe[]{
+    return this.recipeService.findAllWithSort(this.filter);
   }
 
   select(selected: Recipe): void {

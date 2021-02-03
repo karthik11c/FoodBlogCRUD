@@ -9,16 +9,17 @@ export class RecipesService {
   RecipeList: Recipe[] = [];
 
   constructor(private http: HttpClient) { }
-
-  findById(id: string): Observable<Recipe> {
-    const url = `http://www.angular.at/api/Recipe/${id}`;
-    const params = { 'id': id };
+  // 1. findRecipe using id
+  findRecipeById(id: string): Observable<Recipe> {
+    const url = `http://localhost:3001/recipes/recipeById/${id}`;
+    // const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    return this.http.get<Recipe>(url, {params, headers});
+    return this.http.get<Recipe>(url, {headers});
   }
 
-  load(filter: RecipesFilter): void {
-    this.find(filter).subscribe(result => {
+  // 2. get all recipes
+  loadAll(): void {
+    this.findAll().subscribe(result => {
         this.RecipeList = result;
       },
       err => {
@@ -27,16 +28,25 @@ export class RecipesService {
     );
   }
 
-  find(filter: RecipesFilter): Observable<Recipe[]> {
-    const url = `http://www.angular.at/api/Flight`;
+  findAll(): Observable<Recipe[]> { 
+    const url = `http://localhost:3001/recipes/`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
-    const params = {
-      'from': filter.from,
-      'to': filter.to,
-    };
+    return this.http.get<Recipe[]>(url, {headers});
+  }
 
-    return this.http.get<Recipe[]>(url, {params, headers});
+  // 3. sort search
+
+  findAllWithSort(filter: RecipesFilter): Observable<Recipe[]> {
+    const url = `http://localhost:3001/recipes/searchWithSort`;
+    const headers = new HttpHeaders().set('Accept', 'application/json');
+    let var1 = filter.recipeName;
+    let var2 = filter.countryOrigin;
+    // Initialize Params Object
+    let params = new HttpParams({
+      fromString : `recipeName=${var1}&countryOrigin=${var2}`
+    });
+    return this.http.get<Recipe[]>(url,{params : params, headers});
   }
 
   save(entity: Recipe): Observable<Recipe> {
@@ -44,11 +54,11 @@ export class RecipesService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/Recipe/${entity.id.toString()}`;
-      params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.put<Recipe>(url, entity, {headers, params});
+      url = `http://localhost:3001/recipes/updateRecipe`;
+      // params = new HttpParams().set('ID', entity.id.toString());
+      return this.http.put<Recipe>(url, entity, {headers});
     } else {
-      url = `http://www.angular.at/api/Recipe`;
+      url = `http://localhost:3001/recipes/updateRecipe`;
       return this.http.post<Recipe>(url, entity, {headers, params});
     }
   }

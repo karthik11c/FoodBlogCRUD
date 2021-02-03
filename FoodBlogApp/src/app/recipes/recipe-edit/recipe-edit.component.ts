@@ -31,7 +31,7 @@ export class RecipeEditComponent implements OnInit {
         map(p => p.id),
         switchMap(id => {
           if (id === 'new') { return of(new Recipe()); }
-          return this.recipeService.findById(id);
+          return this.recipeService.findRecipeById(id);
         })
       )
       .subscribe(recipe => {

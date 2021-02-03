@@ -11,15 +11,15 @@
       
       <div class="form-group">
         <label for="from-header">RecipeName:</label>
-        <input [(ngModel)]="filter.from" id="from" name="from" class="form-control">
+        <input [(ngModel)]="filter.recipeName" id="recipeName" name="recipeName" class="form-control">
       </div>
       
       <div class="form-group">
         <label for="to">CountryOrigin</label>
-        <input [(ngModel)]="filter.to" id="to" name="to" class="form-control">
+        <input [(ngModel)]="filter.countryOrigin" id="countryOrigin" name="countryOrigin" class="form-control">
       </div>
       
-      <button (click)="search()" [disabled]="!f?.valid" class="btn btn-primary">Search</button>
+      <button (click)="searchWithSort()" [disabled]="!f?.valid" class="btn btn-primary">Search</button>
       <a [routerLink]="['../recipes', 'new' ]" class="btn btn-default">New</a>
     </form>
   </div>
@@ -33,7 +33,7 @@
           <th class="border-top-0" scope="col">Id</th>
           <th class="border-top-0" scope="col">RecipeName</th>
           <th class="border-top-0" scope="col">CountryOrigin</th>
-          <th class="border-top-0" scope="col">Date</th>
+          <th class="border-top-0" scope="col">Category</th>
           <th class="border-top-0" scope="col" style="width:120px"></th>
         </tr>
       </thead>
@@ -41,9 +41,9 @@
         <tr *ngFor="let item of recipeList" [class.active]="item === selectedRecipe">
         
           <td>{{item.id}}</td>
-          <td>{{item.from}}</td>
-          <td>{{item.to}}</td>
-          <td>{{item.date | date}}</td>
+          <td>{{item.recipeName}}</td>
+          <td>{{item.countryOrigin}}</td>
+          <td>{{item.category}}</td>
           <td style="white-space: nowrap">
             <a [routerLink]="['../recipes', item.id ]" class="btn btn-secondary">Edit</a>&nbsp;
             <button (click)="delete(item)" class="btn btn-danger">Delete</button>

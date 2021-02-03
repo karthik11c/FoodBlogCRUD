@@ -1,4 +1,4 @@
 export class RecipesFilter {
-    from = '';
-    to = '';
+    recipeName = '';
+    countryOrigin = '';
 }
