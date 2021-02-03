@@ -27,8 +27,8 @@ export class RecipesListComponent implements OnInit {
     this.recipeService.loadAll();
   }
 
- get searchWithSort(): Recipe[]{
-    return this.recipeService.findAllWithSort(this.filter);
+  searchWithSort(): void{
+    this.recipeService.findAllWithSort(this.filter);
   }
 
   select(selected: Recipe): void {
