@@ -5,6 +5,7 @@ import { RecipesService } from '../recipes.service';
 import { Recipe } from '../recipes';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { RecipesFilter } from '../recipes.filter';
 
 
 @Component({
@@ -12,7 +13,8 @@ import { of } from 'rxjs';
   templateUrl: './recipe-edit.component.html'
 })
 export class RecipeEditComponent implements OnInit {
-
+  filter = new RecipesFilter();
+  newrecipe : boolean;
   id: string;
   recipe: Recipe;
   feedback: any = {};
@@ -30,7 +32,7 @@ export class RecipeEditComponent implements OnInit {
       .pipe(
         map(p => p.id),
         switchMap(id => {
-          if (id === 'new') { return of(new Recipe()); }
+          if (id === 'new') { this.newrecipe = true; return of(new Recipe()); }
           return this.recipeService.findRecipeById(id);
         })
       )
@@ -47,6 +49,7 @@ export class RecipeEditComponent implements OnInit {
   save() {
     this.recipeService.save(this.recipe).subscribe(
       recipe => {
+        // console.log("recipe req:: "+JSON.stringify(recipe));
         this.recipe = recipe;
         this.feedback = {type: 'success', message: 'Save was successful!'};
         setTimeout(() => {

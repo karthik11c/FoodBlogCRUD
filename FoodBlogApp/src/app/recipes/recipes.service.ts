@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Recipe } from './recipes';
 import { RecipesFilter } from './recipes.filter';
-
+//http://localhost:3001/
 @Injectable()
 export class RecipesService {
   RecipeList: Recipe[] = [];
@@ -11,7 +11,7 @@ export class RecipesService {
   constructor(private http: HttpClient) { }
   // 1. findRecipe using id
   findRecipeById(id: string): Observable<Recipe> {
-    const url = `http://localhost:3001/recipes/recipeById/${id}`;
+    const url = `https://kfoodsapi.herokuapp.com/recipes/recipeById/${id}`;
     // const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
     return this.http.get<Recipe>(url, {headers});
@@ -29,7 +29,7 @@ export class RecipesService {
   }
 
   findAll(): Observable<Recipe[]> { 
-    const url = `http://localhost:3001/recipes/`;
+    const url = `https://kfoodsapi.herokuapp.com/recipes/`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     return this.http.get<Recipe[]>(url, {headers});
@@ -37,8 +37,19 @@ export class RecipesService {
 
   // 3. sort search
 
-  findAllWithSort(filter: RecipesFilter): Observable<Recipe[]> {
-    const url = `http://localhost:3001/recipes/searchWithSort`;
+  findAllWithSort(filter: RecipesFilter): void {
+    this.SearchSort(filter).subscribe(result => {
+        this.RecipeList = result;
+      },
+      err => {
+        console.error('error loading', err);
+      }
+    );
+  }
+
+  SearchSort(filter: RecipesFilter): Observable<Recipe[]> {
+    console.log("findWithSort function");
+    const url = `https://kfoodsapi.herokuapp.com/recipes/searchWithSort`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
     let var1 = filter.recipeName;
     let var2 = filter.countryOrigin;
@@ -50,17 +61,19 @@ export class RecipesService {
   }
 
   save(entity: Recipe): Observable<Recipe> {
-    let params = new HttpParams();
+    // let params = new HttpParams();
     let url = '';
+    // console.log('recipe request body:'+JSON.stringify(entity));
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://localhost:3001/recipes/updateRecipe`;
+      url = `https://kfoodsapi.herokuapp.com/recipes/updateRecipe`;
       // params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.put<Recipe>(url, entity, {headers});
-    } else {
-      url = `http://localhost:3001/recipes/updateRecipe`;
-      return this.http.post<Recipe>(url, entity, {headers, params});
+      return this.http.post<Recipe>(url, entity, {headers});
     }
+    // } else {
+    //   url = `https://kfoodsapi.herokuapp.com/recipes/updateRecipe`;
+    //   return this.http.post<Recipe>(url, entity, {headers, params});
+    // }
   }
 
   delete(entity: Recipe): Observable<Recipe> {
@@ -68,9 +81,8 @@ export class RecipesService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/Recipe/${entity.id.toString()}`;
-      params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.delete<Recipe>(url, {headers, params});
+      url = `https://kfoodsapi.herokuapp.com/recipes/deleteRecipe`;
+      return this.http.post<Recipe>(url,entity, {headers});
     }
     return null;
   }

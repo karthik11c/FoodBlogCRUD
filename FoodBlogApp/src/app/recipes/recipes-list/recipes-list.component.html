@@ -19,7 +19,7 @@
         <input [(ngModel)]="filter.countryOrigin" id="countryOrigin" name="countryOrigin" class="form-control">
       </div>
       
-      <button (click)="searchWithSort()" [disabled]="!f?.valid" class="btn btn-primary">Search</button>
+      <button (click)="searchwithsort()" [disabled]="!f?.valid" class="btn btn-primary">Search</button>
       <a [routerLink]="['../recipes', 'new' ]" class="btn btn-default">New</a>
     </form>
   </div>

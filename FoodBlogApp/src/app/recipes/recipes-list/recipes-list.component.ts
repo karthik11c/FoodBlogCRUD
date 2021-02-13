@@ -27,12 +27,13 @@ export class RecipesListComponent implements OnInit {
     this.recipeService.loadAll();
   }
 
-  searchWithSort(): void{
-    this.recipeService.findAllWithSort(this.filter);
-  }
-
   select(selected: Recipe): void {
     this.selectedRecipe = selected;
+  }
+
+  searchwithsort(): void{
+    console.log("button event fired...");
+    this.recipeService.findAllWithSort(this.filter);
   }
 
   delete(recipe: Recipe): void {
