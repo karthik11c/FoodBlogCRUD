@@ -12,7 +12,7 @@ var options = {
 , integer: true
 }
 var corsOptions = {
-  origin: 'http://localhost:4200',
+  origin: 'https://foodishblog.herokuapp.com/',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
  
@@ -52,7 +52,7 @@ router.post("/addRecipe",cors(corsOptions),async (req,res)=>{
 
 // get List of all Food Recipes
 router.get("/recipeById/:id",cors(corsOptions),async (req,res)=>{
-  console.log('request id :'+JSON.stringify(req.params));
+  // console.log('request id :'+JSON.stringify(req.params));
   const  { id } =  req.params;
   // console.log("id:"+id);
   if(id != null)
@@ -61,7 +61,7 @@ router.get("/recipeById/:id",cors(corsOptions),async (req,res)=>{
              await fastfoodModel.find({ id : id}, (err, result)=>{
               if(err) throw err;
               console.log("response: "+JSON.stringify(result));
-              return res.json(result);
+              return res.json(result[0]);
             });
         }catch(e){
           console.error("error : "+e);      
@@ -94,20 +94,30 @@ router.get("/searchWithSort",cors(corsOptions),async (req,res)=>{
       const {recipeName,countryOrigin} = req.query;
       let searchObject = {};     
       conditionObject = {};
-      if(recipeName != null){
-        const userRegex = new RegExp(recipeName, 'i');
+      if(recipeName != ""){
+        const userRegex = new RegExp('.*'+recipeName+'.*', 'i');
         searchObject['recipeName'] = userRegex; 
         conditionObject['recipeName'] = 'asc';
       }
-      if(countryOrigin != null){
-        searchObject['countryOrigin'] = countryOrigin; 
+      if(countryOrigin != ""){
+        const userRegex = new RegExp('.*'+countryOrigin+'.*', 'i');
+        searchObject['countryOrigin'] = userRegex; 
         conditionObject['countryOrigin'] = 'asc';
       }
-      await fastfoodModel.find(searchObject).sort(conditionObject).exec((err, result)=>{
-        if(err) throw err;
-        console.log("response: "+JSON.stringify(result));
-        return res.json(result);
-      });
+      if(recipeName == "" && countryOrigin == ""){
+        await fastfoodModel.find({},(err, result)=>{
+          if(err) throw err;
+          console.log("response if: "+JSON.stringify(result));
+          return res.json(result);
+        });  
+      }else{
+        console.log("recipename : ",JSON.stringify(recipeName), "\ncountryOrigin : "+JSON.stringify(countryOrigin));
+        await fastfoodModel.find(searchObject).sort(conditionObject).exec((err, result)=>{
+          if(err) throw err;
+          console.log("response else: "+JSON.stringify(result));
+          return res.json(result);
+        });  
+      }
     }catch(e){
       console.error("error : "+e);      
       return res.json({ message : "someThing went wrong in Backend", "response_code" : 405 });
@@ -117,7 +127,7 @@ router.get("/searchWithSort",cors(corsOptions),async (req,res)=>{
 
 // update employee
 router.post('/updateRecipe', cors(corsOptions),(req, res) => {
-  // console.log('request id :'+JSON.stringify(req.body));
+  console.log('update request id :'+JSON.stringify(req.body));
   const {id} = req.body;
   var arr = {};
     for (const [key, value] of Object.entries(req.body)) {
@@ -133,8 +143,7 @@ router.post('/updateRecipe', cors(corsOptions),(req, res) => {
             fastfoodModel.findOne({id: id},async(err, result)=>{
               if(err) throw err;
               if(result){
-                // console.log("result:"+JSON.stringify(result._doc));
-
+                console.log("result:"+JSON.stringify(result._doc.id));
                 for (const [sourcekey, sourcevalue] of Object.entries(arr)) {
                   for (const [destkey, destvalue] of Object.entries(result._doc)) {
                     if(sourcekey == destkey){
@@ -143,11 +152,34 @@ router.post('/updateRecipe', cors(corsOptions),(req, res) => {
                   }   
                 }            
                 result.save();
-                return res.json(result);
+                return res.json([result]);
               }
               else{
-                return res.json({ message : "record not found", "response_code" : 404 });
-              }
+
+                // if id not exist then create new one...
+ 
+                req.body["id"] = rn(options); 
+                var model = new fastfoodModel(req.body);
+                try{
+                                model.save(function(err) {
+                                  if (err) {
+                                    if (err.name === 'MongoError' && err.code === 11000) {
+                                      // Duplicate username
+                                      return res.json({ message : "Recipe already exist", "response_code" : 405 });
+                                    }
+                                      console.error(err);
+                                    // Some other error
+                                    return res.json({ message : "someThing went wrong in Backend", "response_code" : 422 });
+                                  }
+              
+                                  return res.json({message :"Recipe added...","response_code": 200});
+                                });
+                                
+                          }catch(e){
+                          console.log("error : "+e);      
+                          return res.json({ message : "someThing went wrong in Backend", "response_code" : 405 });
+                        }   
+                      }
             });
         }catch(e){
           console.log("error : "+e);      
@@ -160,8 +192,9 @@ router.post('/updateRecipe', cors(corsOptions),(req, res) => {
 
 // Delete a employee
 router.post('/deleteRecipe', cors(corsOptions),(req, res) => {
+  console.log('request body : '+JSON.stringify(req.body));
   const {id} = req.body;
- 
+console.log('delete request initiated'); 
   if(id != null)
     {
         try{  
